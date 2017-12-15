@@ -32,8 +32,6 @@ def test(filename, mu, sigma):
 	totalCaseNum = 0.0
 	testfile = open(filename, 'r')
 	testData = read_dataset(filename)
-	# [[nan    4.07142857    0.26328172 ..., 47.07142857   14.], ...
-	# nan (asin) can be ignored in testing
 
 	for item in testData:
 		star = item[1]		# float
@@ -54,6 +52,41 @@ def test(filename, mu, sigma):
 
 	testfile.close()
 
+def predict(filename, mu, sigma):
+	inputfile = open(filename, 'r')
+	outputfile = open("../dataset/productScore/productScore_GA.csv", 'w')
+	process = 0
+
+	for line in inputfile:
+		if line[0] == "#":
+			continue
+
+		process += 1
+		if process % 10000 == 0:
+			print process/10000
+
+		item = line.split("\t")
+		# preprocessing, to float
+		for i in xrange(1,len(item)):
+			item[i] = float(item[i])
+		PDF = []
+		for i in xrange(5):
+			tmp = np.array(item[2:4]) + np.array(item[5:7])
+			PDF.append(pdf(tmp, mu[i], sigma[i]))
+			# PDF.append(pdf(item[2:], mu[i], sigma[i]))
+
+		maxPDF = max(PDF)
+		for i in xrange(5):
+			if maxPDF == PDF[i]:
+				# asin, predict star, real_avgStar ,reviewCount
+				outputfile.write(item[0] + ',' + str(i+1) + ',' + str(item[1]) + ',' + str(int(item[-1])) + '\n')
+				# print str(item[0]) + ',' + str(i+1)
+				break
+
+	outputfile.close()
+	inputfile.close()
+
+
 trainSet = read_dataset("../dataset/reviewsData/Reveiew_statistic_train.txt")
 # 0.asin, 1.avgStar, 2.Summary_PosScore, 3.Summary_NegScore, 
 # 4.SummAvgLen, 5.Review_PosScore, 6.Review_NegScore, 7.ReviewAvgLen, 8.reviewCount
@@ -67,7 +100,8 @@ for i in xrange(5):
 	sigma.append(sigma_i)
 
 
-test("../dataset/reviewsData/Reveiew_statistic_test.txt", mu, sigma)
+# test("../dataset/reviewsData/Reveiew_statistic_test.txt", mu, sigma)
+predict("../dataset/reviewsData/Reveiew_statistic.txt", mu, sigma)
 
 
 
