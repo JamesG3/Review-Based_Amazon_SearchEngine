@@ -210,11 +210,19 @@ def predict():
 				totalStar = 0.0
 				reviewCount = 0
 			elif l["asin"] != product:
-				AvgStar = totalStar/reviewCount
-				outputFile.write(product + ',' + str(AvgStar) + ',' + str(reviewCount) + '\n')
-				product = l["asin"]
-				totalStar = 0.0
-				reviewCount = 0
+				if reviewCount == 0:		# for other languages, reviewCount might be 0
+					AvgStar = 0
+					outputFile.write(product + ',' + str(AvgStar) + ',' + str(reviewCount) + '\n')
+					product = l["asin"]
+					totalStar = 0.0
+					reviewCount = 0
+
+				else:
+					AvgStar = totalStar/reviewCount
+					outputFile.write(product + ',' + str(AvgStar) + ',' + str(reviewCount) + '\n')
+					product = l["asin"]
+					totalStar = 0.0
+					reviewCount = 0
 
 			words = (l["reviewText"] + " " + l["summary"]).split(" ")
 			wordDic = {}	# store the terms from [words] which are in lexicon
@@ -250,7 +258,8 @@ def predict():
 				if TryC[i] == MaxC:
 					totalStar += (i+1)
 					break
-		except:
+		except Exception as e:
+			print e
 			pass
 		
 
