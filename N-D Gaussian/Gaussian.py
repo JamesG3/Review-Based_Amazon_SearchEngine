@@ -27,7 +27,20 @@ def pdf(x, mu, sigma):
 	res = (math.e ** ((-1.0/2) * np.dot(np.dot((x-mu),np.linalg.inv(sigma)), (x-mu).T))) / (2*math.pi * math.sqrt(abs(S)))
 	return res
 
-def test(filename, mu, sigma):
+def getPC(filename):
+	file = open(filename, 'r')
+	PC = [0.0 for i in xrange(5)]
+	for line in file:
+		if line[0] == "#":
+			continue
+		l = line.split("\t")
+		PC[int(round(float(l[1]))) - 1] += 1
+	PCsum = sum(PC)
+	PC = [PC[i]/PCsum for i in xrange(5)]
+	return PC
+
+
+def test(filename, mu, sigma, PC):
 	rightCaseNum = 0.0
 	totalCaseNum = 0.0
 	testfile = open(filename, 'r')
@@ -39,7 +52,7 @@ def test(filename, mu, sigma):
 		PDF = []
 
 		for i in xrange(5):
-			PDF.append(pdf(item[2:4]+item[5:7], mu[i], sigma[i]))
+			PDF.append(pdf(item[2:4]+item[5:7], mu[i], sigma[i]) * PC[i])
 			# PDF.append(pdf(item[2:], mu[i], sigma[i]))
 
 		maxPDF = max(PDF)
@@ -52,7 +65,7 @@ def test(filename, mu, sigma):
 
 	testfile.close()
 
-def predict(filename, mu, sigma):
+def predict(filename, mu, sigma, PC):
 	inputfile = open(filename, 'r')
 	outputfile = open("../dataset/productScore/productScore_GA.csv", 'w')
 	process = 0
@@ -72,7 +85,7 @@ def predict(filename, mu, sigma):
 		PDF = []
 		for i in xrange(5):
 			tmp = np.array(item[2:4]) + np.array(item[5:7])
-			PDF.append(pdf(tmp, mu[i], sigma[i]))
+			PDF.append(pdf(tmp, mu[i], sigma[i]) * PC[i])
 			# PDF.append(pdf(item[2:], mu[i], sigma[i]))
 
 		maxPDF = max(PDF)
@@ -88,6 +101,7 @@ def predict(filename, mu, sigma):
 
 
 trainSet = read_dataset("../dataset/reviewsData/Reveiew_statistic_train.txt")
+PC = getPC("../dataset/reviewsData/Reveiew_statistic_train.txt")
 # 0.asin, 1.avgStar, 2.Summary_PosScore, 3.Summary_NegScore, 
 # 4.SummAvgLen, 5.Review_PosScore, 6.Review_NegScore, 7.ReviewAvgLen, 8.reviewCount
 
@@ -100,8 +114,9 @@ for i in xrange(5):
 	sigma.append(sigma_i)
 
 
-# test("../dataset/reviewsData/Reveiew_statistic_test.txt", mu, sigma)
-predict("../dataset/reviewsData/Reveiew_statistic.txt", mu, sigma)
+# test("../dataset/reviewsData/Reveiew_statistic_test.txt", mu, sigma, PC)
+predict("../dataset/reviewsData/Reveiew_statistic.txt", mu, sigma, PC)
+
 
 
 
