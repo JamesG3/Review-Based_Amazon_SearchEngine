@@ -53,8 +53,8 @@ def compress(docidList):
 	chunks = []				# [chunk, chunk, ...]
 	chunksInfo = []			# [[chunksize, lastdocId], ...]
 
-	for i in xrange(docLen/128 + 1):
-		tmpdocidList = docidList[i*128 : (i+1)*128]
+	for i in xrange(docLen/256 + 1):
+		tmpdocidList = docidList[i*256 : (i+1)*256]
 		if len(tmpdocidList) == 0:
 			break
 

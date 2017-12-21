@@ -36,7 +36,15 @@ for line in productFile:
 		else:
 			currTerm += c
 
-	pgTableFile.write(','.join([str(pgID), asin]))
+	if currTerm != "":
+		currTerm = currTerm.lower()
+		if currTerm not in InvertIndex:
+			InvertIndex[currTerm] = []
+
+		if not (InvertIndex[currTerm] and InvertIndex[currTerm][-1] == pgID):
+			InvertIndex[currTerm].append(pgID)
+
+	pgTableFile.write(','.join([str(pgID), asin, title.replace("\n", "")]))
 	pgTableFile.write('\n')
 	pgID += 1
 	
